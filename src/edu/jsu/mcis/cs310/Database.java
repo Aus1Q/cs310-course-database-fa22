@@ -25,6 +25,20 @@ public class Database {
         String result = null;
         
         // INSERT YOUR CODE HERE
+        try
+        {
+            String query = "SELECT * FROM section WHERE termid = ? AND subjectid = ? AND num = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, termid);
+            statement.setString(2, subjectid);
+            statement.setString(3, num);
+            boolean hasData = statement.execute();
+            if(hasData)
+            {
+                ResultSet rs = statement.getResultSet();
+                result = getResultSetAsJSON(rs);
+            }
+        }catch (Exception e){e.printStackTrace();}
         
         return result;
         
@@ -34,7 +48,16 @@ public class Database {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        // INSERT YOUR CODE HERE 
+        try
+        {
+            String query = "INSERT INTO registration (studentid, termid, crn) VALUES (?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, studentid);
+            statement.setInt(2, termid);
+            statement.setInt(3, crn);
+            result = statement.executeUpdate();
+        }catch(Exception e){e.printStackTrace();}
         
         return result;
         
@@ -45,6 +68,15 @@ public class Database {
         int result = 0;
         
         // INSERT YOUR CODE HERE
+        try
+        {
+            String query = "DELETE FROM registration WHERE studentid = ? AND termid = ? AND crn = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, studentid);
+            statement.setInt(2, termid);
+            statement.setInt(3, crn); 
+            result = statement.executeUpdate();
+        }catch(Exception e){e.printStackTrace();}
         
         return result;
         
@@ -55,6 +87,14 @@ public class Database {
         int result = 0;
         
         // INSERT YOUR CODE HERE
+        try
+        {
+            String query = "DELETE FROM registration WHERE studentid = ? AND termid = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, studentid);
+            statement.setInt(2, termid);
+            result = statement.executeUpdate();
+        }catch(Exception e){e.printStackTrace();}
         
         return result;
         
@@ -65,6 +105,17 @@ public class Database {
         String result = null;
         
         // INSERT YOUR CODE HERE
+        try
+        {
+            String query = "SELECT * FROM registration JOIN section ON registration.crn = section.crn";
+            PreparedStatement statement = connection.prepareStatement(query);
+            boolean hasData = statement.execute();
+            if(hasData)
+            {
+                ResultSet rs = statement.getResultSet();
+                result = getResultSetAsJSON(rs);
+            }
+        }catch(Exception e){e.printStackTrace();}  
         
         return result;
         
@@ -161,7 +212,22 @@ public class Database {
             int columnCount = metadata.getColumnCount();
             
             // INSERT YOUR CODE HERE
-        
+            for(int i=1; i<=columnCount; ++i)
+            {
+                keys.add(metadata.getColumnLabel(i));
+            }
+            
+            while(resultset.next())
+            {
+                JSONObject row = new JSONObject();
+                for(int i=1; i<=columnCount; ++i)
+                {
+                    Object val = resultset.getObject(i);
+                    row.put(keys.get(i-1), String.valueOf(val));
+                }
+                json.add(row);
+            }
+            
         }
         catch (Exception e) { e.printStackTrace(); }
         
